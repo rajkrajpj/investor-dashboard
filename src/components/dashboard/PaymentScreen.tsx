@@ -22,7 +22,7 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
       <header className="w-full h-[72px] px-12 py-4 bg-white flex items-center">
         <img
           className="w-[117.5px] h-10"
-          src="https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&q=80"
+          src="/assets/cultivate-logo.png"
           alt="Cultivate Capital"
         />
         <nav className="ml-8 flex items-center gap-8">

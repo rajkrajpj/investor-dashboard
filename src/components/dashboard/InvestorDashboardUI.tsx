@@ -134,7 +134,7 @@ const InvestorDashboardUI: React.FC<InvestorDashboardUIProps> = ({
         <div className="flex items-center gap-8">
           <img
             className="w-[117.5px] h-10"
-            src="https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&q=80"
+            src="/assets/cultivate-logo.png"
             alt="Cultivate Capital"
           />
           <nav className="flex items-center gap-8">
