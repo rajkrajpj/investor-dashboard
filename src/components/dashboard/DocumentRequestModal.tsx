@@ -1,5 +1,12 @@
-import React from "react";
+import React, { useState, ChangeEvent } from "react";
 import { X, Trash2, Upload } from "lucide-react";
+
+interface UploadedFile {
+  id: string;
+  name: string;
+  // type: string; // Could add type for specific icons or previews later
+  // previewUrl?: string; // For image previews
+}
 
 interface DocumentRequestModalProps {
   companyName?: string;
@@ -14,6 +21,32 @@ const DocumentRequestModal: React.FC<DocumentRequestModalProps> = ({
   onSubmit,
   onCancel,
 }) => {
+  const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
+  const fileInputRef = React.useRef<HTMLInputElement>(null);
+
+  const handleFileSelect = (event: ChangeEvent<HTMLInputElement>) => {
+    const files = event.target.files;
+    if (files) {
+      const newFiles: UploadedFile[] = Array.from(files).map(file => ({
+        id: crypto.randomUUID(), // Generate a unique ID
+        name: file.name,
+      }));
+      setUploadedFiles(prevFiles => [...prevFiles, ...newFiles]);
+    }
+    // Clear the input value to allow re-uploading the same file if needed
+    if(event.target) {
+      event.target.value = "";
+    }
+  };
+
+  const handleRemoveFile = (fileIdToRemove: string) => {
+    setUploadedFiles(prevFiles => prevFiles.filter(file => file.id !== fileIdToRemove));
+  };
+
+  const triggerFileInput = () => {
+    fileInputRef.current?.click();
+  };
+
   return (
     <div className="w-[724px] h-[714px] px-10 pb-10 bg-white rounded-lg flex-col justify-center items-center inline-flex">
       {/* Modal Header */}
@@ -84,36 +117,55 @@ const DocumentRequestModal: React.FC<DocumentRequestModalProps> = ({
           </div>
         </div>
 
-        {/* Image Previews */}
-        <div className="self-stretch justify-start items-start gap-6 inline-flex">
-          {/* Image 1 */}
-          <div className="w-[122px] h-[125px] relative group">
-            <div className="w-[122px] h-[125px] left-0 top-0 absolute bg-[#d9d9d9] rounded-lg"></div>
-            <button className="absolute top-2 left-2 p-1 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-              <Trash2 size={16} className="text-red-500" />
-            </button>
+        {/* Dynamically Rendered File Previews (was Image Previews) */}
+        {uploadedFiles.length > 0 && (
+          <div className="self-stretch justify-start items-start gap-4 inline-flex flex-wrap py-2">
+            {uploadedFiles.map(file => (
+              <div key={file.id} className="w-[122px] h-[125px] relative group mb-2">
+                <div className="w-full h-full bg-gray-100 rounded-lg flex flex-col items-center justify-center p-2 border border-gray-300">
+                  {/* Basic file icon or placeholder for preview */}
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-gray-400 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                  </svg>
+                  <span className="text-xs text-gray-600 text-center break-all leading-tight">{file.name}</span>
+                </div>
+                <button 
+                  onClick={() => handleRemoveFile(file.id)}
+                  className="absolute top-1 right-1 p-1 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-100 focus:opacity-100"
+                  aria-label={`Remove ${file.name}`}
+                >
+                  <Trash2 size={16} className="text-red-500" />
+                </button>
+              </div>
+            ))}
           </div>
-
-          {/* Image 2 */}
-          <div className="w-[122px] h-[125px] relative group">
-            <div className="w-[122px] h-[125px] left-0 top-0 absolute bg-[#d9d9d9] rounded-lg"></div>
-            <button className="absolute top-2 left-2 p-1 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-              <Trash2 size={16} className="text-red-500" />
-            </button>
-          </div>
-
-          {/* Image 3 */}
-          <div className="w-[122px] h-[125px] relative group">
-            <div className="w-[122px] h-[125px] left-0 top-0 absolute bg-[#d9d9d9] rounded-lg"></div>
-            <button className="absolute top-2 left-2 p-1 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity">
-              <Trash2 size={16} className="text-red-500" />
-            </button>
-          </div>
-        </div>
+        )}
 
         {/* File Upload Area */}
-        <div className="self-stretch h-[109px] px-[263px] py-4 bg-gray-50 rounded-lg border-2 border-gray-200 flex-col justify-center items-center gap-2.5 flex">
-          <div className="flex-col justify-start items-center gap-[7px] flex">
+        <input 
+          type="file" 
+          multiple 
+          ref={fileInputRef} 
+          onChange={handleFileSelect} 
+          className="hidden" 
+          accept="image/svg+xml, image/png, image/jpeg, image/gif" // Specify accepted file types
+        />
+        <div 
+          onClick={triggerFileInput} 
+          onDrop={(e) => { 
+            e.preventDefault(); 
+            if (e.dataTransfer.files) {
+              const newFiles: UploadedFile[] = Array.from(e.dataTransfer.files).map(file => ({
+                id: crypto.randomUUID(),
+                name: file.name,
+              }));
+              setUploadedFiles(prevFiles => [...prevFiles, ...newFiles]);
+            }
+          }}
+          onDragOver={(e) => e.preventDefault()} // Necessary for onDrop to work
+          className="self-stretch h-[109px] px-4 py-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 flex-col justify-center items-center gap-2.5 flex cursor-pointer hover:bg-gray-100 transition-colors"
+        >
+          <div className="flex-col justify-start items-center gap-[7px] flex pointer-events-none">
             <Upload size={24} className="text-gray-500" />
             <div className="text-center">
               <span className="text-gray-500 text-sm font-semibold font-inter">
