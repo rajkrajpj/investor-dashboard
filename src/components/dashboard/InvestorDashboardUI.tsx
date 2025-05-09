@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import PaymentScreen from "./PaymentScreen";
 import { RequestItem } from '@/components/RequestsSection';
+import DocumentRequestModal from "./DocumentRequestModal";
 
 interface InvestmentItem {
   offering: string;
@@ -32,6 +33,12 @@ interface InvestorProfile {
   dateOfBirth: string;
   ssn: string;
   avatarUrl: string;
+}
+
+// Define a type for the request data, which we'll use for state
+interface ActiveRequest {
+  companyName: string;
+  details: string;
 }
 
 interface InvestorDashboardUIProps {
@@ -77,11 +84,30 @@ const InvestorDashboardUI: React.FC<InvestorDashboardUIProps> = ({
   },
 }) => {
   const [showPaymentScreen, setShowPaymentScreen] = useState(false);
+  const [showDocumentModal, setShowDocumentModal] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState<ActiveRequest | null>(null);
 
-  // Mocked request data
-  const mockRequest = {
-    companyName: 'Armed Forces Brewing Company',
-    details: 'Details of the request here dolor sit amet consectetur. Massa id massa ullamcorper ac duis mattis eu. Id turpis arcu sed mauris bibendum sapien massa.',
+  // Mocked request data - let's make this an array to simulate multiple requests
+  const mockRequests: ActiveRequest[] = [
+    {
+      companyName: 'Armed Forces Brewing Company',
+      details: 'Details of the request here dolor sit amet consectetur. Massa id massa ullamcorper ac duis mattis eu. Id turpis arcu sed mauris bibendum sapien massa.',
+    },
+    // You can add another mock request here to test with multiple items
+    // {
+    //   companyName: 'Another Company Inc.',
+    //   details: 'Requesting updated financial statements.',
+    // },
+  ];
+
+  const handleOpenDocumentModal = (requestData: ActiveRequest) => {
+    setSelectedRequest(requestData);
+    setShowDocumentModal(true);
+  };
+
+  const handleCloseDocumentModal = () => {
+    setShowDocumentModal(false);
+    setSelectedRequest(null);
   };
 
   const getStatusBadgeColor = (status: string) => {
@@ -232,9 +258,18 @@ const InvestorDashboardUI: React.FC<InvestorDashboardUIProps> = ({
                 <h2 className="text-[#1f2a37] text-xl font-bold mb-4">
                   Requests
                 </h2>
-                {/* Replace the "No active requests" message with RequestItem */}
-                {mockRequest ? (
-                  <RequestItem companyName={mockRequest.companyName} details={mockRequest.details} />
+                {/* Render RequestItems from mockRequests */}
+                {mockRequests.length > 0 ? (
+                  <div className="space-y-4">
+                    {mockRequests.map((request, index) => (
+                      <RequestItem 
+                        key={index} 
+                        companyName={request.companyName} 
+                        details={request.details} 
+                        onUploadClick={handleOpenDocumentModal}
+                      />
+                    ))}
+                  </div>
                 ) : (
                   <div className="px-[23px] py-5 bg-gray-50 rounded-lg text-center">
                     <p className="text-gray-500 text-base">
@@ -341,6 +376,21 @@ const InvestorDashboardUI: React.FC<InvestorDashboardUIProps> = ({
           </div>
         </div>
       </main>
+
+      {/* Render the modal conditionally */}
+      {showDocumentModal && selectedRequest && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <DocumentRequestModal 
+            companyName={selectedRequest.companyName}
+            onClose={handleCloseDocumentModal}
+            onSubmit={() => {
+              console.log("Submit clicked for:", selectedRequest.companyName);
+              handleCloseDocumentModal();
+            }}
+            onCancel={handleCloseDocumentModal}
+          />
+        </div>
+      )}
     </div>
   );
 };
