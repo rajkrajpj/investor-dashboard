@@ -1,5 +1,5 @@
-import InvestorDashboardUI from "@/components/dashboard/InvestorDashboardUI";
+import PaymentScreen from "@/components/dashboard/PaymentScreen";
 
 export default function Home() {
-  return <InvestorDashboardUI />;
+  return <PaymentScreen />;
 }
