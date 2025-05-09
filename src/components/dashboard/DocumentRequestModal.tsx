@@ -1,4 +1,4 @@
-import React, { useState, ChangeEvent } from "react";
+import React, { useState, ChangeEvent, useRef } from "react";
 import { X, Trash2, Upload } from "lucide-react";
 
 interface UploadedFile {
@@ -22,7 +22,7 @@ const DocumentRequestModal: React.FC<DocumentRequestModalProps> = ({
   onCancel,
 }) => {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
-  const fileInputRef = React.useRef<HTMLInputElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileSelect = (event: ChangeEvent<HTMLInputElement>) => {
     const files = event.target.files;
@@ -48,35 +48,30 @@ const DocumentRequestModal: React.FC<DocumentRequestModalProps> = ({
   };
 
   return (
-    <div className="w-[724px] h-[714px] px-10 pb-10 bg-white rounded-lg flex-col justify-center items-center inline-flex">
+    <div className="w-[724px] h-[714px] bg-white rounded-lg flex flex-col shadow-xl overflow-hidden">
       {/* Modal Header */}
-      <div className="self-stretch pt-10 pb-4 justify-between items-center inline-flex">
+      <div className="self-stretch px-10 pt-10 pb-4 flex justify-between items-center border-b border-gray-200">
         <div className="w-[548px] self-stretch justify-start items-center flex">
           <div className="grow shrink basis-0 text-[#111928] text-xl font-semibold font-inter leading-[30px]">
             {companyName} is requesting a document from you.
           </div>
         </div>
-        <div className="self-stretch flex-col justify-start items-end inline-flex">
+        <div className="self-stretch flex-col justify-start items-end">
           <button
             onClick={onClose}
             className="w-5 h-5 flex justify-center items-center"
           >
-            <X size={20} className="text-gray-500" />
+            <X size={20} className="text-gray-500 hover:text-gray-700" />
           </button>
         </div>
       </div>
 
-      {/* Modal Body */}
-      <div className="self-stretch h-[558px] flex-col justify-start items-center gap-4 flex">
-        {/* Separator */}
-        <div className="self-stretch h-px flex-col justify-start items-center flex">
-          <div className="self-stretch h-px bg-gray-200 rounded-2xl"></div>
-        </div>
-
-        {/* Document Type and Number Fields */}
-        <div className="self-stretch justify-start items-start gap-4 inline-flex">
+      {/* Scrollable Modal Content Area */}
+      <div className="self-stretch px-10 flex-grow overflow-y-auto flex flex-col gap-4 py-6">
+        {/* Document Type and Number Fields (Removed inner separator div, rely on gap-4) */}
+        <div className="self-stretch justify-start items-start gap-4 flex flex-col sm:flex-row">
           {/* Document Type Field */}
-          <div className="w-[364px] flex-col justify-start items-start gap-2 inline-flex">
+          <div className="w-full sm:w-1/2 flex-col justify-start items-start gap-2 inline-flex">
             <div className="self-stretch text-sm font-medium text-gray-700">
               DOCUMENT TYPE
             </div>
@@ -90,7 +85,7 @@ const DocumentRequestModal: React.FC<DocumentRequestModalProps> = ({
           </div>
 
           {/* Document Number Field */}
-          <div className="w-[364px] flex-col justify-start items-start gap-2 inline-flex">
+          <div className="w-full sm:w-1/2 flex-col justify-start items-start gap-2 inline-flex">
             <div className="self-stretch text-sm font-medium text-gray-700">
               DOCUMENT NUMBER
             </div>
@@ -117,13 +112,12 @@ const DocumentRequestModal: React.FC<DocumentRequestModalProps> = ({
           </div>
         </div>
 
-        {/* Dynamically Rendered File Previews (was Image Previews) */}
+        {/* Dynamically Rendered File Previews */}
         {uploadedFiles.length > 0 && (
           <div className="self-stretch justify-start items-start gap-4 inline-flex flex-wrap py-2">
             {uploadedFiles.map(file => (
               <div key={file.id} className="w-[122px] h-[125px] relative group mb-2">
                 <div className="w-full h-full bg-gray-100 rounded-lg flex flex-col items-center justify-center p-2 border border-gray-300">
-                  {/* Basic file icon or placeholder for preview */}
                   <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-gray-400 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
                   </svg>
@@ -148,7 +142,7 @@ const DocumentRequestModal: React.FC<DocumentRequestModalProps> = ({
           ref={fileInputRef} 
           onChange={handleFileSelect} 
           className="hidden" 
-          accept="image/svg+xml, image/png, image/jpeg, image/gif" // Specify accepted file types
+          accept="image/svg+xml, image/png, image/jpeg, image/gif"
         />
         <div 
           onClick={triggerFileInput} 
@@ -162,8 +156,8 @@ const DocumentRequestModal: React.FC<DocumentRequestModalProps> = ({
               setUploadedFiles(prevFiles => [...prevFiles, ...newFiles]);
             }
           }}
-          onDragOver={(e) => e.preventDefault()} // Necessary for onDrop to work
-          className="self-stretch h-[109px] px-4 py-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 flex-col justify-center items-center gap-2.5 flex cursor-pointer hover:bg-gray-100 transition-colors"
+          onDragOver={(e) => e.preventDefault()}
+          className="self-stretch min-h-[109px] px-4 py-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 flex-col justify-center items-center gap-2.5 flex cursor-pointer hover:bg-gray-100 transition-colors"
         >
           <div className="flex-col justify-start items-center gap-[7px] flex pointer-events-none">
             <Upload size={24} className="text-gray-500" />
@@ -181,26 +175,22 @@ const DocumentRequestModal: React.FC<DocumentRequestModalProps> = ({
             </div>
           </div>
         </div>
+      </div>
 
-        {/* Action Buttons */}
-        <div className="self-stretch pt-4 justify-between items-start inline-flex">
-          <button
-            onClick={onCancel}
-            className="px-5 py-3 rounded-lg border border-gray-200 justify-center items-center gap-2 flex hover:bg-gray-50 transition-colors"
-          >
-            <span className="text-gray-700 text-sm font-medium font-inter">
-              Cancel
-            </span>
-          </button>
-          <button
-            onClick={onSubmit}
-            className="px-5 py-3 bg-[#1a56db] rounded-lg justify-center items-center gap-2 flex hover:bg-blue-700 transition-colors"
-          >
-            <span className="text-white text-sm font-medium font-inter">
-              Submit now
-            </span>
-          </button>
-        </div>
+      {/* Modal Footer / Action Buttons */}
+      <div className="self-stretch px-10 pt-6 pb-10 flex justify-between items-center border-t border-gray-200">
+        <button
+          onClick={onCancel}
+          className="px-5 py-3 rounded-lg border border-gray-300 justify-center items-center gap-2 flex hover:bg-gray-100 transition-colors text-gray-700 text-sm font-medium font-inter focus:outline-none focus:ring-2 focus:ring-gray-400"
+        >
+          Cancel
+        </button>
+        <button
+          onClick={onSubmit}
+          className="px-5 py-3 bg-[#1a56db] rounded-lg justify-center items-center gap-2 flex hover:bg-blue-700 transition-colors text-white text-sm font-medium font-inter focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
+        >
+          Submit now
+        </button>
       </div>
     </div>
   );
