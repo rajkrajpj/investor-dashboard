@@ -14,6 +14,7 @@ import {
   Edit,
 } from "lucide-react";
 import PaymentScreen from "./PaymentScreen";
+import { RequestItem } from '@/components/RequestsSection';
 
 interface InvestmentItem {
   offering: string;
@@ -76,6 +77,12 @@ const InvestorDashboardUI: React.FC<InvestorDashboardUIProps> = ({
   },
 }) => {
   const [showPaymentScreen, setShowPaymentScreen] = useState(false);
+
+  // Mocked request data
+  const mockRequest = {
+    companyName: 'Armed Forces Brewing Company',
+    details: 'Details of the request here dolor sit amet consectetur. Massa id massa ullamcorper ac duis mattis eu. Id turpis arcu sed mauris bibendum sapien massa.',
+  };
 
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
@@ -225,12 +232,17 @@ const InvestorDashboardUI: React.FC<InvestorDashboardUIProps> = ({
                 <h2 className="text-[#1f2a37] text-xl font-bold mb-4">
                   Requests
                 </h2>
-                <div className="px-[23px] py-5 bg-gray-50 rounded-lg text-center">
-                  <p className="text-gray-500 text-base">
-                    No active requests right now. We will let you know if we
-                    need additional documents from you. Thank you!
-                  </p>
-                </div>
+                {/* Replace the "No active requests" message with RequestItem */}
+                {mockRequest ? (
+                  <RequestItem companyName={mockRequest.companyName} details={mockRequest.details} />
+                ) : (
+                  <div className="px-[23px] py-5 bg-gray-50 rounded-lg text-center">
+                    <p className="text-gray-500 text-base">
+                      No active requests right now. We will let you know if we
+                      need additional documents from you. Thank you!
+                    </p>
+                  </div>
+                )}
               </div>
             </Card>
           </div>
