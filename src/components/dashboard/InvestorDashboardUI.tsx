@@ -16,6 +16,8 @@ import {
 import PaymentScreen from "./PaymentScreen";
 import { RequestItem } from '@/components/RequestsSection';
 import DocumentRequestModal from "./DocumentRequestModal";
+import ProfileUpdateModal from "@/components/dashboard/ProfileUpdateModal";
+import Link from "next/link";
 
 interface InvestmentItem {
   offering: string;
@@ -85,6 +87,7 @@ const InvestorDashboardUI: React.FC<InvestorDashboardUIProps> = ({
 }) => {
   const [showPaymentScreen, setShowPaymentScreen] = useState(false);
   const [showDocumentModal, setShowDocumentModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
   const [selectedRequest, setSelectedRequest] = useState<ActiveRequest | null>(null);
 
   // Mocked request data - let's make this an array to simulate multiple requests
@@ -108,6 +111,14 @@ const InvestorDashboardUI: React.FC<InvestorDashboardUIProps> = ({
   const handleCloseDocumentModal = () => {
     setShowDocumentModal(false);
     setSelectedRequest(null);
+  };
+
+  const handleOpenProfileModal = () => {
+    setShowProfileModal(true);
+  };
+
+  const handleCloseProfileModal = () => {
+    setShowProfileModal(false);
   };
 
   const getStatusBadgeColor = (status: string) => {
@@ -139,7 +150,9 @@ const InvestorDashboardUI: React.FC<InvestorDashboardUIProps> = ({
           />
           <nav className="flex items-center gap-8">
             <div className="text-[#3170bf] text-base font-bold">Dashboard</div>
-            <div className="text-[#728094] text-base">Transactions</div>
+            <Link href="/dashboard/investments" className="text-[#728094] text-base hover:text-[#3170bf]">
+              Transactions
+            </Link>
           </nav>
         </div>
         <div className="ml-auto flex items-center gap-4">
@@ -301,7 +314,10 @@ const InvestorDashboardUI: React.FC<InvestorDashboardUIProps> = ({
                       INVESTOR
                     </p>
                   </div>
-                  <Button className="bg-[#1a56db] text-white px-5 py-2.5 rounded-lg flex items-center gap-2">
+                  <Button
+                    onClick={handleOpenProfileModal}
+                    className="bg-[#1a56db] text-white px-5 py-2.5 rounded-lg flex items-center gap-2"
+                  >
                     <Edit className="h-4 w-4" />
                     Edit profile
                   </Button>
@@ -380,16 +396,20 @@ const InvestorDashboardUI: React.FC<InvestorDashboardUIProps> = ({
       {/* Render the modal conditionally */}
       {showDocumentModal && selectedRequest && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-          <DocumentRequestModal 
+          <DocumentRequestModal
+            isOpen={showDocumentModal}
             companyName={selectedRequest.companyName}
             onClose={handleCloseDocumentModal}
-            onSubmit={() => {
-              console.log("Submit clicked for:", selectedRequest.companyName);
-              handleCloseDocumentModal();
-            }}
-            onCancel={handleCloseDocumentModal}
           />
         </div>
+      )}
+
+      {/* Render the ProfileUpdateModal conditionally */}
+      {showProfileModal && (
+        <ProfileUpdateModal
+          isOpen={showProfileModal}
+          onClose={handleCloseProfileModal}
+        />
       )}
     </div>
   );

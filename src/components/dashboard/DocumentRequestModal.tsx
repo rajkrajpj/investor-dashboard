@@ -1,14 +1,13 @@
 "use client";
 
 import React, { useState, ChangeEvent, useRef } from "react";
-import { X, Trash2, Upload } from "lucide-react";
+import { Trash2, Upload } from "lucide-react";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
   DialogFooter,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
@@ -16,16 +15,18 @@ import { Button } from "@/components/ui/button";
 interface UploadedFile {
   id: string;
   name: string;
-  // type: string; // Could add type for specific icons or previews later
-  // previewUrl?: string; // For image previews
 }
 
 interface DocumentRequestModalProps {
   companyName?: string;
+  isOpen: boolean;
+  onClose: () => void;
 }
 
 const DocumentRequestModal: React.FC<DocumentRequestModalProps> = ({
   companyName = "Armed Forces Brewing Company",
+  isOpen,
+  onClose,
 }) => {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -34,12 +35,11 @@ const DocumentRequestModal: React.FC<DocumentRequestModalProps> = ({
     const files = event.target.files;
     if (files) {
       const newFiles: UploadedFile[] = Array.from(files).map(file => ({
-        id: crypto.randomUUID(), // Generate a unique ID
+        id: crypto.randomUUID(),
         name: file.name,
       }));
       setUploadedFiles(prevFiles => [...prevFiles, ...newFiles]);
     }
-    // Clear the input value to allow re-uploading the same file if needed
     if(event.target) {
       event.target.value = "";
     }
@@ -55,16 +55,12 @@ const DocumentRequestModal: React.FC<DocumentRequestModalProps> = ({
 
   const handleSubmit = () => {
     console.log("Submitting documents:", uploadedFiles);
-    // Add actual submission logic here
-    // Typically, you'd close the dialog after submission:
-    // Find a way to programmatically close if needed, or rely on DialogClose
+    // Handle submission logic here
+    onClose();
   };
 
   return (
-    <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="default">Upload Document</Button>
-      </DialogTrigger>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="max-w-3xl">
         <DialogHeader>
           <DialogTitle>{companyName} is requesting a document from you.</DialogTitle>
@@ -164,7 +160,7 @@ const DocumentRequestModal: React.FC<DocumentRequestModalProps> = ({
 
         <DialogFooter className="pt-4 border-t">
           <DialogPrimitive.Close asChild>
-            <Button variant="outline">Cancel</Button>
+            <Button variant="outline" onClick={onClose}>Cancel</Button>
           </DialogPrimitive.Close>
           <Button onClick={handleSubmit}>Submit now</Button>
         </DialogFooter>

@@ -10,8 +10,8 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
 
 interface ProfileData {
   name: string;
@@ -23,7 +23,12 @@ interface ProfileData {
   profilePicture?: string;
 }
 
-export default function ProfileUpdateModal() {
+interface ProfileUpdateModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+export default function ProfileUpdateModal({ isOpen, onClose }: ProfileUpdateModalProps) {
   const [profileData, setProfileData] = useState<ProfileData>({
     name: "John Bean Doe",
     email: "johndoe@gmail.com",
@@ -46,15 +51,11 @@ export default function ProfileUpdateModal() {
   const handleSave = () => {
     // Handle save logic here
     console.log("Saving profile data:", profileData);
+    onClose();
   };
 
   return (
-    <Dialog>
-      <DialogTrigger>
-        <button className="px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 transition-colors">
-          Edit Profile
-        </button>
-      </DialogTrigger>
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
       <DialogContent className="sm:max-w-[500px]">
         <DialogHeader>
           <DialogTitle>Edit Profile</DialogTitle>
@@ -172,6 +173,15 @@ export default function ProfileUpdateModal() {
 
           {/* Action Buttons */}
           <div className="flex justify-end items-center gap-6 mt-2">
+            <DialogPrimitive.Close asChild>
+              <Button
+                variant="outline"
+                onClick={onClose}
+                className="px-5 py-3 rounded-lg border border-gray-200 text-gray-700 font-medium"
+              >
+                Cancel
+              </Button>
+            </DialogPrimitive.Close>
             <Button
               variant="default"
               onClick={handleSave}
