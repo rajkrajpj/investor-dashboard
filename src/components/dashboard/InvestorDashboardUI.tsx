@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,7 @@ import {
   CreditCard,
   Edit,
 } from "lucide-react";
+import PaymentScreen from "./PaymentScreen";
 
 interface InvestmentItem {
   offering: string;
@@ -74,6 +75,8 @@ const InvestorDashboardUI: React.FC<InvestorDashboardUIProps> = ({
     avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=investor",
   },
 }) => {
+  const [showPaymentScreen, setShowPaymentScreen] = useState(false);
+
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
       case "Funds Received":
@@ -86,6 +89,10 @@ const InvestorDashboardUI: React.FC<InvestorDashboardUIProps> = ({
         return "bg-gray-100 text-gray-800";
     }
   };
+
+  if (showPaymentScreen) {
+    return <PaymentScreen onClose={() => setShowPaymentScreen(false)} />;
+  }
 
   return (
     <div className="w-full min-h-screen bg-[#f5f8ff]">
@@ -123,7 +130,10 @@ const InvestorDashboardUI: React.FC<InvestorDashboardUIProps> = ({
           <h1 className="text-[#0f2644] text-3xl font-bold">
             Welcome, {userName}!
           </h1>
-          <Button className="bg-[#1a56db] text-white px-5 py-3 rounded-lg">
+          <Button
+            className="bg-[#1a56db] text-white px-5 py-3 rounded-lg"
+            onClick={() => setShowPaymentScreen(true)}
+          >
             Create a payment
           </Button>
         </div>

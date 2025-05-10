@@ -8,11 +8,13 @@ import { Input } from "@/components/ui/input";
 interface PaymentScreenProps {
   userEmail?: string;
   userAvatarUrl?: string;
+  onClose?: () => void;
 }
 
 const PaymentScreen: React.FC<PaymentScreenProps> = ({
   userEmail = "johndoe@gmail.com",
   userAvatarUrl = "https://api.dicebear.com/7.x/avataaars/svg?seed=investor",
+  onClose,
 }) => {
   return (
     <div className="w-full min-h-screen bg-[#f5f8ff] font-inter">
@@ -53,6 +55,7 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
           <Button
             variant="outline"
             className="flex items-center gap-2 px-3 py-2 rounded-lg border border-gray-200"
+            onClick={onClose}
           >
             <ArrowLeft className="w-5 h-5" />
             <span>Back to all investments</span>
@@ -150,6 +153,7 @@ const PaymentScreen: React.FC<PaymentScreenProps> = ({
                 <Button
                   variant="outline"
                   className="px-5 py-2 rounded-lg border border-gray-200"
+                  onClick={onClose}
                 >
                   Cancel
                 </Button>
