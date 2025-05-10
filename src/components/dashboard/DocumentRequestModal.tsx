@@ -1,5 +1,17 @@
+"use client";
+
 import React, { useState, ChangeEvent, useRef } from "react";
 import { X, Trash2, Upload } from "lucide-react";
+import * as DialogPrimitive from "@radix-ui/react-dialog";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+  DialogFooter,
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
 
 interface UploadedFile {
   id: string;
@@ -10,16 +22,10 @@ interface UploadedFile {
 
 interface DocumentRequestModalProps {
   companyName?: string;
-  onClose?: () => void;
-  onSubmit?: () => void;
-  onCancel?: () => void;
 }
 
 const DocumentRequestModal: React.FC<DocumentRequestModalProps> = ({
   companyName = "Armed Forces Brewing Company",
-  onClose,
-  onSubmit,
-  onCancel,
 }) => {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -47,152 +53,123 @@ const DocumentRequestModal: React.FC<DocumentRequestModalProps> = ({
     fileInputRef.current?.click();
   };
 
-  return (
-    <div className="w-[724px] h-[714px] bg-white rounded-lg flex flex-col shadow-xl overflow-hidden">
-      {/* Modal Header */}
-      <div className="self-stretch px-10 pt-10 pb-4 flex justify-between items-center border-b border-gray-200">
-        <div className="w-[548px] self-stretch justify-start items-center flex">
-          <div className="grow shrink basis-0 text-[#111928] text-xl font-semibold font-inter leading-[30px]">
-            {companyName} is requesting a document from you.
-          </div>
-        </div>
-        <div className="self-stretch flex-col justify-start items-end">
-          <button
-            onClick={onClose}
-            className="w-5 h-5 flex justify-center items-center"
-          >
-            <X size={20} className="text-gray-500 hover:text-gray-700" />
-          </button>
-        </div>
-      </div>
+  const handleSubmit = () => {
+    console.log("Submitting documents:", uploadedFiles);
+    // Add actual submission logic here
+    // Typically, you'd close the dialog after submission:
+    // Find a way to programmatically close if needed, or rely on DialogClose
+  };
 
-      {/* Scrollable Modal Content Area */}
-      <div className="self-stretch px-10 flex-grow overflow-y-auto flex flex-col gap-4 py-6">
-        {/* Document Type and Number Fields (Removed inner separator div, rely on gap-4) */}
-        <div className="self-stretch justify-start items-start gap-4 flex flex-col sm:flex-row">
-          {/* Document Type Field */}
-          <div className="w-full sm:w-1/2 flex-col justify-start items-start gap-2 inline-flex">
-            <div className="self-stretch text-sm font-medium text-gray-700">
-              DOCUMENT TYPE
-            </div>
-            <div className="self-stretch px-4 py-3 bg-gray-50 rounded-lg border border-gray-300 justify-start items-center gap-2.5 inline-flex">
+  return (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button variant="default">Upload Document</Button>
+      </DialogTrigger>
+      <DialogContent className="max-w-3xl">
+        <DialogHeader>
+          <DialogTitle>{companyName} is requesting a document from you.</DialogTitle>
+        </DialogHeader>
+
+        <div className="max-h-[60vh] overflow-y-auto p-1 pr-4 space-y-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="flex-col justify-start items-start gap-2 inline-flex">
+              <label htmlFor="docType" className="text-sm font-medium text-gray-700">DOCUMENT TYPE</label>
               <input
+                id="docType"
                 type="text"
                 placeholder="Document type"
-                className="grow shrink basis-0 h-[18px] bg-transparent outline-none text-gray-900 placeholder-gray-500 text-sm"
+                className="w-full px-4 py-3 bg-gray-50 rounded-lg border border-gray-300 outline-none text-gray-900 placeholder-gray-500 text-sm"
               />
             </div>
-          </div>
-
-          {/* Document Number Field */}
-          <div className="w-full sm:w-1/2 flex-col justify-start items-start gap-2 inline-flex">
-            <div className="self-stretch text-sm font-medium text-gray-700">
-              DOCUMENT NUMBER
-            </div>
-            <div className="self-stretch px-4 py-3 bg-gray-50 rounded-lg border border-gray-300 justify-start items-center gap-2.5 inline-flex">
+            <div className="flex-col justify-start items-start gap-2 inline-flex">
+              <label htmlFor="docNum" className="text-sm font-medium text-gray-700">DOCUMENT NUMBER</label>
               <input
+                id="docNum"
                 type="text"
                 placeholder="Document number"
-                className="grow shrink basis-0 h-[18px] bg-transparent outline-none text-gray-900 placeholder-gray-500 text-sm"
+                className="w-full px-4 py-3 bg-gray-50 rounded-lg border border-gray-300 outline-none text-gray-900 placeholder-gray-500 text-sm"
               />
             </div>
           </div>
-        </div>
 
-        {/* Details Field */}
-        <div className="self-stretch flex-col justify-start items-start flex">
-          <div className="w-full flex-col justify-start items-start gap-2 flex">
-            <div className="self-stretch text-sm font-medium text-gray-700">
-              DETAILS
-            </div>
+          <div className="flex-col justify-start items-start flex">
+            <label htmlFor="details" className="text-sm font-medium text-gray-700">DETAILS</label>
             <textarea
-              placeholder="Lorem ipsum dolor sit amet consectetur. Tempus vitae bibendum vulputate sed lorem sed ornare. Interdum condimentum tincidunt et mi elementum in ut fermentum. Id tincidunt volutpat sapien ultrices dictum nunc."
-              className="self-stretch min-h-[113px] px-5 py-[13px] bg-gray-50 rounded-lg border border-gray-300 outline-none text-gray-900 placeholder-gray-500 text-sm resize-none"
+              id="details"
+              placeholder="Provide details about the document..."
+              className="w-full min-h-[100px] px-5 py-3 bg-gray-50 rounded-lg border border-gray-300 outline-none text-gray-900 placeholder-gray-500 text-sm resize-none"
             />
           </div>
-        </div>
 
-        {/* Dynamically Rendered File Previews */}
-        {uploadedFiles.length > 0 && (
-          <div className="self-stretch justify-start items-start gap-4 inline-flex flex-wrap py-2">
-            {uploadedFiles.map(file => (
-              <div key={file.id} className="w-[122px] h-[125px] relative group mb-2">
-                <div className="w-full h-full bg-gray-100 rounded-lg flex flex-col items-center justify-center p-2 border border-gray-300">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-gray-400 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
-                  </svg>
-                  <span className="text-xs text-gray-600 text-center break-all leading-tight">{file.name}</span>
+          {uploadedFiles.length > 0 && (
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 py-2">
+              {uploadedFiles.map(file => (
+                <div key={file.id} className="relative group aspect-square">
+                  <div className="w-full h-full bg-gray-100 rounded-lg flex flex-col items-center justify-center p-2 border border-gray-300">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-10 w-10 text-gray-400 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                    </svg>
+                    <span className="text-xs text-gray-600 text-center break-all leading-tight">{file.name}</span>
+                  </div>
+                  <button 
+                    onClick={() => handleRemoveFile(file.id)}
+                    className="absolute top-1 right-1 p-1 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-100 focus:opacity-100"
+                    aria-label={`Remove ${file.name}`}
+                  >
+                    <Trash2 size={16} className="text-red-500" />
+                  </button>
                 </div>
-                <button 
-                  onClick={() => handleRemoveFile(file.id)}
-                  className="absolute top-1 right-1 p-1 bg-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-100 focus:opacity-100"
-                  aria-label={`Remove ${file.name}`}
-                >
-                  <Trash2 size={16} className="text-red-500" />
-                </button>
-              </div>
-            ))}
-          </div>
-        )}
+              ))}
+            </div>
+          )}
 
-        {/* File Upload Area */}
-        <input 
-          type="file" 
-          multiple 
-          ref={fileInputRef} 
-          onChange={handleFileSelect} 
-          className="hidden" 
-          accept="image/svg+xml, image/png, image/jpeg, image/gif"
-        />
-        <div 
-          onClick={triggerFileInput} 
-          onDrop={(e) => { 
-            e.preventDefault(); 
-            if (e.dataTransfer.files) {
-              const newFiles: UploadedFile[] = Array.from(e.dataTransfer.files).map(file => ({
-                id: crypto.randomUUID(),
-                name: file.name,
-              }));
-              setUploadedFiles(prevFiles => [...prevFiles, ...newFiles]);
-            }
-          }}
-          onDragOver={(e) => e.preventDefault()}
-          className="self-stretch min-h-[109px] px-4 py-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 flex-col justify-center items-center gap-2.5 flex cursor-pointer hover:bg-gray-100 transition-colors"
-        >
-          <div className="flex-col justify-start items-center gap-[7px] flex pointer-events-none">
+          <input 
+            type="file" 
+            multiple 
+            ref={fileInputRef} 
+            onChange={handleFileSelect} 
+            className="hidden" 
+            accept=".pdf,.doc,.docx,.txt,image/*"
+          />
+          <div 
+            onClick={triggerFileInput} 
+            onDrop={(e) => { 
+              e.preventDefault(); 
+              if (e.dataTransfer.files) {
+                const newFiles: UploadedFile[] = Array.from(e.dataTransfer.files).map(file => ({
+                  id: crypto.randomUUID(),
+                  name: file.name,
+                }));
+                setUploadedFiles(prevFiles => [...prevFiles, ...newFiles]);
+              }
+            }}
+            onDragOver={(e) => e.preventDefault()}
+            className="w-full min-h-[100px] p-4 bg-gray-50 rounded-lg border-2 border-dashed border-gray-300 flex flex-col justify-center items-center gap-2 cursor-pointer hover:bg-gray-100 transition-colors"
+          >
             <Upload size={24} className="text-gray-500" />
             <div className="text-center">
-              <span className="text-gray-500 text-sm font-semibold font-inter">
+              <span className="text-gray-500 text-sm font-semibold">
                 Click to upload
               </span>
-              <span className="text-gray-500 text-sm font-normal font-inter">
+              <span className="text-gray-500 text-sm font-normal">
                 {" "}
                 or drag and drop
               </span>
             </div>
-            <div className="text-center text-gray-500 text-xs font-normal font-inter">
-              SVG, PNG, JPG or GIF (MAX. 800x400px)
+            <div className="text-center text-gray-500 text-xs font-normal">
+              PDF, DOC, DOCX, TXT, PNG, JPG, GIF etc.
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Modal Footer / Action Buttons */}
-      <div className="self-stretch px-10 pt-6 pb-10 flex justify-between items-center border-t border-gray-200">
-        <button
-          onClick={onCancel}
-          className="px-5 py-3 rounded-lg border border-gray-300 justify-center items-center gap-2 flex hover:bg-gray-100 transition-colors text-gray-700 text-sm font-medium font-inter focus:outline-none focus:ring-2 focus:ring-gray-400"
-        >
-          Cancel
-        </button>
-        <button
-          onClick={onSubmit}
-          className="px-5 py-3 bg-[#1a56db] rounded-lg justify-center items-center gap-2 flex hover:bg-blue-700 transition-colors text-white text-sm font-medium font-inter focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-1"
-        >
-          Submit now
-        </button>
-      </div>
-    </div>
+        <DialogFooter className="pt-4 border-t">
+          <DialogPrimitive.Close asChild>
+            <Button variant="outline">Cancel</Button>
+          </DialogPrimitive.Close>
+          <Button onClick={handleSubmit}>Submit now</Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
   );
 };
 
