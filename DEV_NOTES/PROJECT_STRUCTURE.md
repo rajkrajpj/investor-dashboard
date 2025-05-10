@@ -114,6 +114,7 @@ For an internal application using Next.js (App Router), the focus should be on c
     2.  Investigate `src/app/payments/page.tsx` vs. the content of `src/app/dashboard/payments/`. Decide on one, remove the other, or clarify their distinct purposes.
 *   **Strategic Decisions:**
     1.  Clearly define what `src/app/page.tsx` (the `/` route) represents for an authenticated user.
+        *   **Decision:** Option A selected. The `/` route will serve as the main landing/overview page for authenticated users. A `/login` page will be created, and middleware will manage authentication redirects.
     2.  Implement robust authentication protection, likely using middleware for the `/dashboard` scope.
 
 This approach will lead to a cleaner, more maintainable, and logical routing structure for your internal application.
