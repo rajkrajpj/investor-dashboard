@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import Link from "next/link";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
@@ -25,6 +25,7 @@ import {
   User,
   FileText,
   X,
+  CreditCard,
 } from "lucide-react";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
 import NotificationCenter from "./NotificationCenter";
@@ -35,6 +36,7 @@ interface DashboardLayoutProps {
 
 const DashboardLayout = ({ children }: DashboardLayoutProps) => {
   const pathname = usePathname();
+  const router = useRouter();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
 
@@ -53,6 +55,11 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       name: "Documents",
       href: "/dashboard/documents",
       icon: <FileText className="h-5 w-5" />,
+    },
+    {
+      name: "Payments",
+      href: "/dashboard/payments",
+      icon: <CreditCard className="h-5 w-5" />,
     },
     {
       name: "Profile",
@@ -128,19 +135,31 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
       {/* Main Content */}
       <div className="lg:pl-64">
         {/* Header */}
-        <header className="sticky top-0 z-10 flex h-14 items-center border-b bg-background px-4 lg:px-6">
-          <SheetTrigger asChild className="lg:hidden">
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setIsSidebarOpen(true)}
-            >
-              <Menu className="h-5 w-5" />
-              <span className="sr-only">Toggle sidebar</span>
-            </Button>
-          </SheetTrigger>
+        <header className="sticky top-0 z-10 flex h-14 items-center justify-between border-b bg-background px-4 lg:px-6">
+          <div className="flex items-center">
+            <SheetTrigger asChild className="lg:hidden">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => setIsSidebarOpen(true)}
+              >
+                <Menu className="h-5 w-5" />
+                <span className="sr-only">Toggle sidebar</span>
+              </Button>
+            </SheetTrigger>
+            
+            {/* Header Navigation Links */}
+            <nav className="hidden md:flex md:ml-6 space-x-8">
+              <button
+                onClick={() => router.push('/dashboard/investments')}
+                className="text-sm font-medium px-1 py-2 text-gray-700 hover:text-blue-600 border-b-2 border-transparent hover:border-blue-600 transition-colors"
+              >
+                Transactions
+              </button>
+            </nav>
+          </div>
 
-          <div className="ml-auto flex items-center space-x-4">
+          <div className="flex items-center space-x-4">
             {/* Notification Bell */}
             <div className="relative">
               <Button
@@ -182,7 +201,7 @@ const DashboardLayout = ({ children }: DashboardLayoutProps) => {
               <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel>My Account</DropdownMenuLabel>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem>
+                <DropdownMenuItem onClick={() => router.push('/dashboard/profile')}>
                   <User className="mr-2 h-4 w-4" />
                   <span>Profile</span>
                 </DropdownMenuItem>

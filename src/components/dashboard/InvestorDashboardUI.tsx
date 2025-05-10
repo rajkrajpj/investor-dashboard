@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -13,6 +13,11 @@ import {
   CreditCard,
   Edit,
 } from "lucide-react";
+import PaymentScreen from "./PaymentScreen";
+import { RequestItem } from '@/components/RequestsSection';
+import DocumentRequestModal from "./DocumentRequestModal";
+import ProfileUpdateModal from "@/components/dashboard/ProfileUpdateModal";
+import Link from "next/link";
 
 interface InvestmentItem {
   offering: string;
@@ -30,6 +35,12 @@ interface InvestorProfile {
   dateOfBirth: string;
   ssn: string;
   avatarUrl: string;
+}
+
+// Define a type for the request data, which we'll use for state
+interface ActiveRequest {
+  companyName: string;
+  details: string;
 }
 
 interface InvestorDashboardUIProps {
@@ -74,6 +85,42 @@ const InvestorDashboardUI: React.FC<InvestorDashboardUIProps> = ({
     avatarUrl: "https://api.dicebear.com/7.x/avataaars/svg?seed=investor",
   },
 }) => {
+  const [showPaymentScreen, setShowPaymentScreen] = useState(false);
+  const [showDocumentModal, setShowDocumentModal] = useState(false);
+  const [showProfileModal, setShowProfileModal] = useState(false);
+  const [selectedRequest, setSelectedRequest] = useState<ActiveRequest | null>(null);
+
+  // Mocked request data - let's make this an array to simulate multiple requests
+  const mockRequests: ActiveRequest[] = [
+    {
+      companyName: 'Armed Forces Brewing Company',
+      details: 'Details of the request here dolor sit amet consectetur. Massa id massa ullamcorper ac duis mattis eu. Id turpis arcu sed mauris bibendum sapien massa.',
+    },
+    // You can add another mock request here to test with multiple items
+    // {
+    //   companyName: 'Another Company Inc.',
+    //   details: 'Requesting updated financial statements.',
+    // },
+  ];
+
+  const handleOpenDocumentModal = (requestData: ActiveRequest) => {
+    setSelectedRequest(requestData);
+    setShowDocumentModal(true);
+  };
+
+  const handleCloseDocumentModal = () => {
+    setShowDocumentModal(false);
+    setSelectedRequest(null);
+  };
+
+  const handleOpenProfileModal = () => {
+    setShowProfileModal(true);
+  };
+
+  const handleCloseProfileModal = () => {
+    setShowProfileModal(false);
+  };
+
   const getStatusBadgeColor = (status: string) => {
     switch (status) {
       case "Funds Received":
@@ -87,6 +134,10 @@ const InvestorDashboardUI: React.FC<InvestorDashboardUIProps> = ({
     }
   };
 
+  if (showPaymentScreen) {
+    return <PaymentScreen onClose={() => setShowPaymentScreen(false)} />;
+  }
+
   return (
     <div className="w-full min-h-screen bg-[#f5f8ff]">
       {/* Header/Navigation */}
@@ -94,12 +145,11 @@ const InvestorDashboardUI: React.FC<InvestorDashboardUIProps> = ({
         <div className="flex items-center gap-8">
           <img
             className="w-[117.5px] h-10"
-            src="https://images.unsplash.com/photo-1579546929518-9e396f3cc809?w=200&q=80"
+            src="/assets/cultivate-logo.png"
             alt="Cultivate Capital"
           />
           <nav className="flex items-center gap-8">
             <div className="text-[#3170bf] text-base font-bold">Dashboard</div>
-            <div className="text-[#728094] text-base">Transactions</div>
           </nav>
         </div>
         <div className="ml-auto flex items-center gap-4">
@@ -123,7 +173,10 @@ const InvestorDashboardUI: React.FC<InvestorDashboardUIProps> = ({
           <h1 className="text-[#0f2644] text-3xl font-bold">
             Welcome, {userName}!
           </h1>
-          <Button className="bg-[#1a56db] text-white px-5 py-3 rounded-lg">
+          <Button
+            className="bg-[#1a56db] text-white px-5 py-3 rounded-lg"
+            onClick={() => setShowPaymentScreen(true)}
+          >
             Create a payment
           </Button>
         </div>
@@ -215,12 +268,26 @@ const InvestorDashboardUI: React.FC<InvestorDashboardUIProps> = ({
                 <h2 className="text-[#1f2a37] text-xl font-bold mb-4">
                   Requests
                 </h2>
-                <div className="px-[23px] py-5 bg-gray-50 rounded-lg text-center">
-                  <p className="text-gray-500 text-base">
-                    No active requests right now. We will let you know if we
-                    need additional documents from you. Thank you!
-                  </p>
-                </div>
+                {/* Render RequestItems from mockRequests */}
+                {mockRequests.length > 0 ? (
+                  <div className="space-y-4">
+                    {mockRequests.map((request, index) => (
+                      <RequestItem 
+                        key={index} 
+                        companyName={request.companyName} 
+                        details={request.details} 
+                        onUploadClick={handleOpenDocumentModal}
+                      />
+                    ))}
+                  </div>
+                ) : (
+                  <div className="px-[23px] py-5 bg-gray-50 rounded-lg text-center">
+                    <p className="text-gray-500 text-base">
+                      No active requests right now. We will let you know if we
+                      need additional documents from you. Thank you!
+                    </p>
+                  </div>
+                )}
               </div>
             </Card>
           </div>
@@ -244,7 +311,10 @@ const InvestorDashboardUI: React.FC<InvestorDashboardUIProps> = ({
                       INVESTOR
                     </p>
                   </div>
-                  <Button className="bg-[#1a56db] text-white px-5 py-2.5 rounded-lg flex items-center gap-2">
+                  <Button
+                    onClick={handleOpenProfileModal}
+                    className="bg-[#1a56db] text-white px-5 py-2.5 rounded-lg flex items-center gap-2"
+                  >
                     <Edit className="h-4 w-4" />
                     Edit profile
                   </Button>
@@ -319,6 +389,25 @@ const InvestorDashboardUI: React.FC<InvestorDashboardUIProps> = ({
           </div>
         </div>
       </main>
+
+      {/* Render the modal conditionally */}
+      {showDocumentModal && selectedRequest && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
+          <DocumentRequestModal
+            isOpen={showDocumentModal}
+            companyName={selectedRequest.companyName}
+            onClose={handleCloseDocumentModal}
+          />
+        </div>
+      )}
+
+      {/* Render the ProfileUpdateModal conditionally */}
+      {showProfileModal && (
+        <ProfileUpdateModal
+          isOpen={showProfileModal}
+          onClose={handleCloseProfileModal}
+        />
+      )}
     </div>
   );
 };
