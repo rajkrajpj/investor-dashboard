@@ -1,17 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import {
-  Search,
-  Filter,
-  ChevronDown,
-  ChevronUp,
-  Check,
-  X,
-  AlertCircle,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
+import React from "react";
+import { ChevronDown, ChevronUp } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import {
   Table,
@@ -21,24 +11,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
 import { Badge } from "@/components/ui/badge";
 
 interface Investment {
   id: string;
   offeringName: string;
   amount: number;
+  shares: number;
   investmentDate: string;
-  paymentStatus: "PENDING" | "SUCCESS" | "FAILED" | "REFUNDED" | "VOIDED";
-  tradeStatus: "PENDING" | "SUBMITTED" | "CLEARED" | "REJECTED" | "CANCELLED";
-  kycStatus: "PENDING" | "APPROVED" | "REJECTED" | "REVIEW";
-  isFundsReceived: boolean;
-  isTradeCleared: boolean;
+  paymentMethod: string;
+  transactionId: string;
+  status: "Funds Received" | "Invested" | "Voided / Refunded";
 }
 
 interface InvestmentTableProps {
@@ -49,63 +32,61 @@ const InvestmentTable: React.FC<InvestmentTableProps> = ({
   investments = [
     {
       id: "1",
-      offeringName: "Tech Growth Fund III",
-      amount: 25000,
-      investmentDate: "2023-10-15",
-      paymentStatus: "SUCCESS" as const,
-      tradeStatus: "CLEARED" as const,
-      kycStatus: "APPROVED" as const,
-      isFundsReceived: true,
-      isTradeCleared: true,
+      offeringName: "Armed Forces Brewing Company",
+      amount: 2300,
+      shares: 201,
+      investmentDate: "mm/dd/yyyy",
+      paymentMethod: "ACH",
+      transactionId: "06292332qwmbyse",
+      status: "Funds Received" as const,
     },
     {
       id: "2",
-      offeringName: "Real Estate Opportunity Fund",
-      amount: 50000,
-      investmentDate: "2023-11-20",
-      paymentStatus: "SUCCESS" as const,
-      tradeStatus: "PENDING" as const,
-      kycStatus: "APPROVED" as const,
-      isFundsReceived: true,
-      isTradeCleared: false,
+      offeringName: "Armed Forces Brewing Company",
+      amount: 5000,
+      shares: 425,
+      investmentDate: "mm/dd/yyyy",
+      paymentMethod: "Wire",
+      transactionId: "06294412aldkajdl",
+      status: "Invested" as const,
     },
     {
       id: "3",
-      offeringName: "Healthcare Innovation Fund",
-      amount: 15000,
-      investmentDate: "2024-01-05",
-      paymentStatus: "PENDING" as const,
-      tradeStatus: "PENDING" as const,
-      kycStatus: "PENDING" as const,
-      isFundsReceived: false,
-      isTradeCleared: false,
+      offeringName: "Offering Company Name",
+      amount: 234,
+      shares: 20,
+      investmentDate: "mm/dd/yyyy",
+      paymentMethod: "Card",
+      transactionId: "06295692qoweies",
+      status: "Voided / Refunded" as const,
     },
     {
       id: "4",
-      offeringName: "Sustainable Energy Project",
-      amount: 35000,
-      investmentDate: "2024-02-12",
-      paymentStatus: "FAILED" as const,
-      tradeStatus: "CANCELLED" as const,
-      kycStatus: "REJECTED" as const,
-      isFundsReceived: false,
-      isTradeCleared: false,
+      offeringName: "Offering Company Name",
+      amount: 5000,
+      shares: 425,
+      investmentDate: "mm/dd/yyyy",
+      paymentMethod: "Wire",
+      transactionId: "06294412aldkajdl",
+      status: "Invested" as const,
+    },
+    {
+      id: "5",
+      offeringName: "Offering Company Name",
+      amount: 234,
+      shares: 20,
+      investmentDate: "mm/dd/yyyy",
+      paymentMethod: "Card",
+      transactionId: "06295692qoweies",
+      status: "Funds Received" as const,
     },
   ],
 }) => {
-  const [searchTerm, setSearchTerm] = useState("");
   const [sortField, setSortField] =
-    useState<keyof Investment>("investmentDate");
-  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
-  const [statusFilter, setStatusFilter] = useState<{
-    payment: string[];
-    trade: string[];
-    kyc: string[];
-  }>({
-    payment: [],
-    trade: [],
-    kyc: [],
-  });
+    React.useState<keyof Investment>("investmentDate");
+  const [sortDirection, setSortDirection] = React.useState<"asc" | "desc">(
+    "desc",
+  );
 
   const handleSort = (field: keyof Investment) => {
     if (sortField === field) {
@@ -116,73 +97,19 @@ const InvestmentTable: React.FC<InvestmentTableProps> = ({
     }
   };
 
-  const toggleStatusFilter = (
-    type: "payment" | "trade" | "kyc",
-    value: string,
-  ) => {
-    setStatusFilter((prev) => {
-      const currentFilters = [...prev[type]];
-      const index = currentFilters.indexOf(value);
-
-      if (index >= 0) {
-        currentFilters.splice(index, 1);
-      } else {
-        currentFilters.push(value);
-      }
-
-      return {
-        ...prev,
-        [type]: currentFilters,
-      };
-    });
-  };
-
-  const filteredInvestments = investments
-    .filter((investment) => {
-      // Search filter
-      const matchesSearch = investment.offeringName
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase());
-
-      // Status filters
-      const matchesPaymentStatus =
-        statusFilter.payment.length === 0 ||
-        statusFilter.payment.includes(investment.paymentStatus);
-
-      const matchesTradeStatus =
-        statusFilter.trade.length === 0 ||
-        statusFilter.trade.includes(investment.tradeStatus);
-
-      const matchesKycStatus =
-        statusFilter.kyc.length === 0 ||
-        statusFilter.kyc.includes(investment.kycStatus);
-
-      return (
-        matchesSearch &&
-        matchesPaymentStatus &&
-        matchesTradeStatus &&
-        matchesKycStatus
-      );
-    })
-    .sort((a, b) => {
-      if (sortField === "amount") {
-        return sortDirection === "asc"
-          ? a.amount - b.amount
-          : b.amount - a.amount;
-      } else if (sortField === "investmentDate") {
-        return sortDirection === "asc"
-          ? new Date(a.investmentDate).getTime() -
-              new Date(b.investmentDate).getTime()
-          : new Date(b.investmentDate).getTime() -
-              new Date(a.investmentDate).getTime();
-      } else {
-        const aValue = String(a[sortField]).toLowerCase();
-        const bValue = String(b[sortField]).toLowerCase();
-        return sortDirection === "asc"
-          ? aValue.localeCompare(bValue)
-          : bValue.localeCompare(aValue);
-      }
-    });
+  const sortedInvestments = [...investments].sort((a, b) => {
+    if (sortField === "amount" || sortField === "shares") {
+      return sortDirection === "asc"
+        ? a[sortField] - b[sortField]
+        : b[sortField] - a[sortField];
+    } else {
+      const aValue = String(a[sortField]).toLowerCase();
+      const bValue = String(b[sortField]).toLowerCase();
+      return sortDirection === "asc"
+        ? aValue.localeCompare(bValue)
+        : bValue.localeCompare(aValue);
+    }
+  });
 
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat("en-US", {
@@ -193,265 +120,138 @@ const InvestmentTable: React.FC<InvestmentTableProps> = ({
     }).format(amount);
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("en-US", {
-      year: "numeric",
-      month: "short",
-      day: "numeric",
-    });
-  };
-
-  const getStatusBadge = (
-    status: string,
-    type: "payment" | "trade" | "kyc",
-  ) => {
-    let variant: "default" | "secondary" | "destructive" | "outline" =
-      "default";
-
-    if (status === "SUCCESS" || status === "CLEARED" || status === "APPROVED") {
-      variant = "default";
-    } else if (
-      status === "PENDING" ||
-      status === "SUBMITTED" ||
-      status === "REVIEW"
-    ) {
-      variant = "secondary";
-    } else {
-      variant = "destructive";
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "Funds Received":
+        return (
+          <Badge className="bg-[#def7ec] text-[#03543e] hover:bg-[#def7ec] font-normal">
+            Funds Received
+          </Badge>
+        );
+      case "Invested":
+        return (
+          <Badge className="bg-[#edebfe] text-[#5521b5] hover:bg-[#edebfe] font-normal">
+            Invested
+          </Badge>
+        );
+      case "Voided / Refunded":
+        return (
+          <Badge className="bg-[#edebfe] text-[#5521b5] hover:bg-[#edebfe] font-normal">
+            Voided / Refunded
+          </Badge>
+        );
+      default:
+        return (
+          <Badge className="bg-gray-100 text-gray-800 hover:bg-gray-100 font-normal">
+            {status}
+          </Badge>
+        );
     }
-
-    return (
-      <Badge variant={variant} className="whitespace-nowrap">
-        {status.charAt(0).toUpperCase() + status.slice(1).toLowerCase()}
-      </Badge>
-    );
   };
 
   return (
-    <Card className="w-full bg-white">
-      <CardContent className="p-6">
-        <div className="flex flex-col space-y-4">
-          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-            <h2 className="text-2xl font-bold">My Investments</h2>
-            <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-              <div className="relative w-full sm:w-64">
-                <Search className="absolute left-2 top-2.5 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search investments..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-8"
-                />
-              </div>
+    <div className="w-full">
+      <div className="w-full mb-6">
+        <h1 className="text-3xl font-bold text-[#0f2644] font-inter">
+          All Investments
+        </h1>
+      </div>
 
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="flex items-center gap-1">
-                    <Filter className="h-4 w-4" />
-                    <span>Filter</span>
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="w-56">
-                  <div className="p-2">
-                    <h4 className="font-medium mb-1">Payment Status</h4>
-                    {["PENDING", "SUCCESS", "FAILED", "REFUNDED", "VOIDED"].map(
-                      (status) => (
-                        <div
-                          key={`payment-${status}`}
-                          className="flex items-center space-x-2"
-                        >
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="justify-start w-full"
-                            onClick={() =>
-                              toggleStatusFilter("payment", status)
-                            }
-                          >
-                            <div className="flex items-center w-full">
-                              <div className="w-4 h-4 border rounded-sm mr-2 flex items-center justify-center">
-                                {statusFilter.payment.includes(status) && (
-                                  <Check className="h-3 w-3" />
-                                )}
-                              </div>
-                              <span>
-                                {status.charAt(0).toUpperCase() +
-                                  status.slice(1).toLowerCase()}
-                              </span>
-                            </div>
-                          </Button>
-                        </div>
-                      ),
-                    )}
-
-                    <h4 className="font-medium mb-1 mt-3">Trade Status</h4>
-                    {[
-                      "PENDING",
-                      "SUBMITTED",
-                      "CLEARED",
-                      "REJECTED",
-                      "CANCELLED",
-                    ].map((status) => (
-                      <div
-                        key={`trade-${status}`}
-                        className="flex items-center space-x-2"
-                      >
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="justify-start w-full"
-                          onClick={() => toggleStatusFilter("trade", status)}
-                        >
-                          <div className="flex items-center w-full">
-                            <div className="w-4 h-4 border rounded-sm mr-2 flex items-center justify-center">
-                              {statusFilter.trade.includes(status) && (
-                                <Check className="h-3 w-3" />
-                              )}
-                            </div>
-                            <span>
-                              {status.charAt(0).toUpperCase() +
-                                status.slice(1).toLowerCase()}
-                            </span>
-                          </div>
-                        </Button>
-                      </div>
-                    ))}
-
-                    <h4 className="font-medium mb-1 mt-3">KYC Status</h4>
-                    {["PENDING", "APPROVED", "REJECTED", "REVIEW"].map(
-                      (status) => (
-                        <div
-                          key={`kyc-${status}`}
-                          className="flex items-center space-x-2"
-                        >
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="justify-start w-full"
-                            onClick={() => toggleStatusFilter("kyc", status)}
-                          >
-                            <div className="flex items-center w-full">
-                              <div className="w-4 h-4 border rounded-sm mr-2 flex items-center justify-center">
-                                {statusFilter.kyc.includes(status) && (
-                                  <Check className="h-3 w-3" />
-                                )}
-                              </div>
-                              <span>
-                                {status.charAt(0).toUpperCase() +
-                                  status.slice(1).toLowerCase()}
-                              </span>
-                            </div>
-                          </Button>
-                        </div>
-                      ),
-                    )}
-                  </div>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
-          </div>
-
-          {filteredInvestments.length > 0 ? (
-            <div className="rounded-md border overflow-hidden">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead
-                      className="cursor-pointer"
-                      onClick={() => handleSort("offeringName")}
-                    >
-                      <div className="flex items-center">
-                        Offering
-                        {sortField === "offeringName" &&
-                          (sortDirection === "asc" ? (
-                            <ChevronUp className="ml-1 h-4 w-4" />
-                          ) : (
-                            <ChevronDown className="ml-1 h-4 w-4" />
-                          ))}
-                      </div>
-                    </TableHead>
-                    <TableHead
-                      className="cursor-pointer text-right"
-                      onClick={() => handleSort("amount")}
-                    >
-                      <div className="flex items-center justify-end">
-                        Amount
-                        {sortField === "amount" &&
-                          (sortDirection === "asc" ? (
-                            <ChevronUp className="ml-1 h-4 w-4" />
-                          ) : (
-                            <ChevronDown className="ml-1 h-4 w-4" />
-                          ))}
-                      </div>
-                    </TableHead>
-                    <TableHead
-                      className="cursor-pointer"
-                      onClick={() => handleSort("investmentDate")}
-                    >
-                      <div className="flex items-center">
-                        Date
-                        {sortField === "investmentDate" &&
-                          (sortDirection === "asc" ? (
-                            <ChevronUp className="ml-1 h-4 w-4" />
-                          ) : (
-                            <ChevronDown className="ml-1 h-4 w-4" />
-                          ))}
-                      </div>
-                    </TableHead>
-                    <TableHead>Payment Status</TableHead>
-                    <TableHead>Trade Status</TableHead>
-                    <TableHead>KYC Status</TableHead>
+      <Card className="w-full bg-white shadow-[0px_1px_2px_0px_rgba(0,0,0,0.08)] rounded-lg">
+        <CardContent className="p-4 pb-5">
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow className="bg-gray-50">
+                  <TableHead className="font-semibold text-xs text-gray-500 font-inter">
+                    OFFERING
+                  </TableHead>
+                  <TableHead
+                    className="font-semibold text-xs text-gray-500 font-inter cursor-pointer"
+                    onClick={() => handleSort("investmentDate")}
+                  >
+                    <div className="flex items-center gap-2">
+                      DATE
+                      {sortField === "investmentDate" &&
+                        (sortDirection === "asc" ? (
+                          <ChevronUp className="h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" />
+                        ))}
+                    </div>
+                  </TableHead>
+                  <TableHead
+                    className="font-semibold text-xs text-gray-500 font-inter cursor-pointer"
+                    onClick={() => handleSort("paymentMethod")}
+                  >
+                    <div className="flex items-center gap-2">
+                      PAYMENT
+                      {sortField === "paymentMethod" &&
+                        (sortDirection === "asc" ? (
+                          <ChevronUp className="h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" />
+                        ))}
+                    </div>
+                  </TableHead>
+                  <TableHead
+                    className="font-semibold text-xs text-gray-500 font-inter cursor-pointer"
+                    onClick={() => handleSort("transactionId")}
+                  >
+                    <div className="flex items-center gap-2">
+                      TRANS. ID
+                      {sortField === "transactionId" &&
+                        (sortDirection === "asc" ? (
+                          <ChevronUp className="h-4 w-4" />
+                        ) : (
+                          <ChevronDown className="h-4 w-4" />
+                        ))}
+                    </div>
+                  </TableHead>
+                  <TableHead className="font-semibold text-xs text-gray-500 font-inter">
+                    SHARES
+                  </TableHead>
+                  <TableHead className="font-semibold text-xs text-gray-500 font-inter">
+                    AMOUNT
+                  </TableHead>
+                  <TableHead className="font-semibold text-xs text-gray-500 font-inter">
+                    STATUS
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sortedInvestments.map((investment, index) => (
+                  <TableRow
+                    key={investment.id}
+                    className={index % 2 === 1 ? "bg-gray-50" : ""}
+                  >
+                    <TableCell className="text-sm text-gray-500 font-normal font-inter">
+                      {investment.offeringName}
+                    </TableCell>
+                    <TableCell className="text-sm text-gray-500 font-normal font-inter">
+                      {investment.investmentDate}
+                    </TableCell>
+                    <TableCell className="text-sm text-gray-500 font-normal font-inter">
+                      {investment.paymentMethod}
+                    </TableCell>
+                    <TableCell className="text-sm text-gray-500 font-normal font-inter">
+                      {investment.transactionId}
+                    </TableCell>
+                    <TableCell className="text-sm text-black font-semibold font-inter">
+                      {investment.shares}
+                    </TableCell>
+                    <TableCell className="text-sm text-black font-semibold font-inter">
+                      {formatCurrency(investment.amount)}
+                    </TableCell>
+                    <TableCell>{getStatusBadge(investment.status)}</TableCell>
                   </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredInvestments.map((investment) => (
-                    <TableRow
-                      key={investment.id}
-                      className="cursor-pointer hover:bg-muted/50"
-                      onClick={() =>
-                        console.log(
-                          `View investment details for ID: ${investment.id}`,
-                        )
-                      }
-                    >
-                      <TableCell className="font-medium">
-                        {investment.offeringName}
-                      </TableCell>
-                      <TableCell className="text-right">
-                        {formatCurrency(investment.amount)}
-                      </TableCell>
-                      <TableCell>
-                        {formatDate(investment.investmentDate)}
-                      </TableCell>
-                      <TableCell>
-                        {getStatusBadge(investment.paymentStatus, "payment")}
-                      </TableCell>
-                      <TableCell>
-                        {getStatusBadge(investment.tradeStatus, "trade")}
-                      </TableCell>
-                      <TableCell>
-                        {getStatusBadge(investment.kycStatus, "kyc")}
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
-            </div>
-          ) : (
-            <div className="flex flex-col items-center justify-center p-8 text-center border rounded-md bg-muted/10">
-              <AlertCircle className="h-10 w-10 text-muted-foreground mb-2" />
-              <h3 className="font-medium text-lg">No investments found</h3>
-              <p className="text-muted-foreground mt-1">
-                {searchTerm ||
-                Object.values(statusFilter).some((arr) => arr.length > 0)
-                  ? "Try adjusting your search or filters"
-                  : "You don't have any investments yet"}
-              </p>
-            </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 
