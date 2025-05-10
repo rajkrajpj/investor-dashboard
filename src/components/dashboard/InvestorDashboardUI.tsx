@@ -150,9 +150,6 @@ const InvestorDashboardUI: React.FC<InvestorDashboardUIProps> = ({
           />
           <nav className="flex items-center gap-8">
             <div className="text-[#3170bf] text-base font-bold">Dashboard</div>
-            <Link href="/dashboard/investments" className="text-[#728094] text-base hover:text-[#3170bf]">
-              Transactions
-            </Link>
           </nav>
         </div>
         <div className="ml-auto flex items-center gap-4">
