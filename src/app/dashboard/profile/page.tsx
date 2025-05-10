@@ -1,9 +1,12 @@
 "use client";
 
 import { useState } from "react";
-import ProfileUpdateModal from "@/components/dashboard/ProfileUpdateModal";
+import dynamic from 'next/dynamic';
+// import ProfileUpdateModal from "@/components/dashboard/ProfileUpdateModal";
 import { Button } from "@/components/ui/button";
 // import DashboardLayout from "@/components/dashboard/DashboardLayout"; // Likely handled by group layout
+
+const ProfileUpdateModal = dynamic(() => import('@/components/dashboard/ProfileUpdateModal'), { ssr: false });
 
 export default function ProfilePage() {
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -19,10 +22,12 @@ export default function ProfilePage() {
         >
           Edit Profile
         </Button>
-        <ProfileUpdateModal 
-          isOpen={isModalOpen}
-          onClose={() => setIsModalOpen(false)}
-        />
+        {isModalOpen && (
+          <ProfileUpdateModal 
+            isOpen={isModalOpen}
+            onClose={() => setIsModalOpen(false)}
+          />
+        )}
       </div>
     // </DashboardLayout> // Likely handled by group layout
   );

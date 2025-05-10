@@ -1,5 +1,8 @@
-import InvestmentTable from "@/components/dashboard/InvestmentTable";
-import DashboardLayout from "@/components/dashboard/DashboardLayout";
+import dynamic from 'next/dynamic';
+// import InvestmentTable from "@/components/dashboard/InvestmentTable";
+// import DashboardLayout from "@/components/dashboard/DashboardLayout"; // Likely handled by group layout
+
+const InvestmentTable = dynamic(() => import('@/components/dashboard/InvestmentTable'), { ssr: false });
 
 export default function InvestmentsPage() {
   return (
